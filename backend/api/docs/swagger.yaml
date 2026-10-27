@@ -1,0 +1,1960 @@
+definitions:
+  dto.ChangePasswordRequest:
+    properties:
+      current_password:
+        type: string
+      new_password:
+        type: string
+    required:
+    - current_password
+    - new_password
+    type: object
+  dto.CreateDiagramRequest:
+    properties:
+      dbml:
+        type: string
+      folder_id:
+        description: FolderID files the new diagram in a folder the caller may edit;
+          "" = top level.
+        type: string
+      name:
+        type: string
+      positions:
+        additionalProperties:
+          $ref: '#/definitions/model.Position'
+        type: object
+    required:
+    - name
+    type: object
+  dto.CreateFolderRequest:
+    properties:
+      name:
+        type: string
+      parent_id:
+        description: ParentID nests the folder inside one the caller may edit; ""
+          = top level.
+        type: string
+    required:
+    - name
+    type: object
+  dto.CreateTokenRequest:
+    properties:
+      expires_in_days:
+        description: ExpiresInDays is 1..365; omitted means the default (90).
+        type: integer
+      name:
+        type: string
+      scope:
+        $ref: '#/definitions/model.TokenScope'
+    required:
+    - name
+    - scope
+    type: object
+  dto.CreateVersionRequest:
+    properties:
+      label:
+        type: string
+    type: object
+  dto.DiagramList:
+    properties:
+      count:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/model.DiagramItem'
+        type: array
+    type: object
+  dto.Empty:
+    type: object
+  dto.Error:
+    properties:
+      error:
+        $ref: '#/definitions/dto.ResponseError'
+    type: object
+  dto.FolderList:
+    properties:
+      count:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/model.Folder'
+        type: array
+    type: object
+  dto.Health:
+    properties:
+      status:
+        type: string
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.MemberList:
+    properties:
+      count:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/model.Member'
+        type: array
+    type: object
+  dto.PatchDiagramRequest:
+    properties:
+      base_revision:
+        description: 'BaseRevision: see ReplaceDiagramRequest.'
+        type: integer
+      dbml:
+        type: string
+      name:
+        type: string
+      positions:
+        additionalProperties:
+          $ref: '#/definitions/model.Position'
+        type: object
+    type: object
+  dto.PatchFolderRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  dto.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dto.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  dto.ReplaceDiagramRequest:
+    properties:
+      base_revision:
+        type: integer
+      dbml:
+        type: string
+      name:
+        type: string
+      positions:
+        additionalProperties:
+          $ref: '#/definitions/model.Position'
+        type: object
+    required:
+    - name
+    type: object
+  dto.ReplaceFolderRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.ResponseError:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  dto.SetDiagramFolderRequest:
+    properties:
+      folder_id:
+        description: FolderID is the folder guid; "" takes the diagram out of its
+          folder.
+        type: string
+    type: object
+  dto.SetDiagramShareRequest:
+    properties:
+      enabled:
+        type: boolean
+    required:
+    - enabled
+    type: object
+  dto.SetMemberRequest:
+    properties:
+      email:
+        type: string
+      role:
+        $ref: '#/definitions/model.Role'
+    required:
+    - email
+    - role
+    type: object
+  dto.SetParentRequest:
+    properties:
+      parent_id:
+        description: ParentID is the new parent folder guid; "" makes the folder top
+          level.
+        type: string
+    type: object
+  dto.TokenList:
+    properties:
+      count:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/model.AccessToken'
+        type: array
+    type: object
+  dto.UpdateMeRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.VersionList:
+    properties:
+      count:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/model.VersionItem'
+        type: array
+    type: object
+  model.AccessToken:
+    properties:
+      created_at:
+        type: string
+      expires_at:
+        type: string
+      guid:
+        type: string
+      last_used_at:
+        type: string
+      name:
+        type: string
+      prefix:
+        type: string
+      scope:
+        $ref: '#/definitions/model.TokenScope'
+    type: object
+  model.AuthResult:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        description: seconds until the access token expires
+        type: integer
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
+  model.CreatedAccessToken:
+    properties:
+      created_at:
+        type: string
+      expires_at:
+        type: string
+      guid:
+        type: string
+      last_used_at:
+        type: string
+      name:
+        type: string
+      prefix:
+        type: string
+      scope:
+        $ref: '#/definitions/model.TokenScope'
+      token:
+        type: string
+    type: object
+  model.Diagram:
+    properties:
+      created_at:
+        type: string
+      dbml:
+        type: string
+      folder_id:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      owner_name:
+        type: string
+      positions:
+        additionalProperties:
+          $ref: '#/definitions/model.Position'
+        type: object
+      revision:
+        type: integer
+      role:
+        allOf:
+        - $ref: '#/definitions/model.Role'
+        description: Role is the CALLER's role, filled in by the service; it is not
+          a column.
+      share_token:
+        type: string
+      updated_at:
+        type: string
+      updated_by_name:
+        type: string
+    type: object
+  model.DiagramItem:
+    properties:
+      created_at:
+        type: string
+      folder_id:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      owner_name:
+        type: string
+      role:
+        $ref: '#/definitions/model.Role'
+      share_token:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.Folder:
+    properties:
+      created_at:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      owner_name:
+        type: string
+      parent_id:
+        type: string
+      role:
+        $ref: '#/definitions/model.Role'
+      updated_at:
+        type: string
+    type: object
+  model.Member:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/model.Role'
+      user_id:
+        type: string
+    type: object
+  model.Position:
+    properties:
+      x:
+        type: number
+      "y":
+        type: number
+    type: object
+  model.Revision:
+    properties:
+      revision:
+        type: integer
+      updated_at:
+        type: string
+      updated_by_name:
+        type: string
+    type: object
+  model.Role:
+    enum:
+    - ""
+    - viewer
+    - editor
+    - owner
+    type: string
+    x-enum-varnames:
+    - RoleNone
+    - RoleViewer
+    - RoleEditor
+    - RoleOwner
+  model.SharedDiagram:
+    properties:
+      dbml:
+        type: string
+      name:
+        type: string
+      positions:
+        additionalProperties:
+          $ref: '#/definitions/model.Position'
+        type: object
+    type: object
+  model.TokenScope:
+    enum:
+    - read
+    - write
+    type: string
+    x-enum-comments:
+      ScopeRead: safe requests and read-only tools
+      ScopeWrite: everything a user can do except account management
+    x-enum-descriptions:
+    - safe requests and read-only tools
+    - everything a user can do except account management
+    x-enum-varnames:
+    - ScopeRead
+    - ScopeWrite
+  model.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+    type: object
+  model.Version:
+    properties:
+      created_at:
+        type: string
+      dbml:
+        type: string
+      diagram_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+      positions:
+        additionalProperties:
+          $ref: '#/definitions/model.Position'
+        type: object
+    type: object
+  model.VersionItem:
+    properties:
+      created_at:
+        type: string
+      diagram_id:
+        type: string
+      guid:
+        type: string
+      label:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: DBML diagrams in nested folders, shared with other people as owner,
+    editor or viewer.
+  title: dbdiagram API
+  version: "1.0"
+paths:
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Signs in with email and password. A wrong email and a wrong password
+        get the same answer.
+      parameters:
+      - description: credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AuthResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Login
+      tags:
+      - auth
+  /v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Ends the login the refresh token belongs to. Always succeeds for
+        an unknown token.
+      parameters:
+      - description: refresh token
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Empty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Logout
+      tags:
+      - auth
+  /v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Trades a refresh token for a new access and refresh token. The
+        old refresh token stops working; presenting one that was already used ends
+        the whole login.
+      parameters:
+      - description: refresh token
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AuthResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Refresh tokens
+      tags:
+      - auth
+  /v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates an account and signs it in. Rate limited per IP.
+      parameters:
+      - description: account
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AuthResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Register
+      tags:
+      - auth
+  /v1/diagrams:
+    get:
+      description: Lists diagrams without their DBML. search matches the name; filters
+        is a JSON array [{field,type,value}] over name, folder_id (empty value = unfiled),
+        created_at, updated_at; sort is a JSON array [{field,type}] over name, created_at,
+        updated_at (default updated_at desc).
+      parameters:
+      - description: text in the name
+        in: query
+        name: search
+        type: string
+      - description: JSON array of {field,type,value}
+        in: query
+        name: filters
+        type: string
+      - description: JSON array of {field,type}
+        in: query
+        name: sort
+        type: string
+      - default: 1
+        description: page, from 1
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: page size, max 1000
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DiagramList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram list
+      tags:
+      - diagrams
+    post:
+      consumes:
+      - application/json
+      description: Creates a diagram. dbml and positions may be omitted for an empty
+        one.
+      parameters:
+      - description: diagram
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateDiagramRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Diagram'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram create
+      tags:
+      - diagrams
+  /v1/diagrams/{key}:
+    delete:
+      description: Soft deletes the diagram; its public link stops working at once.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Empty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram delete
+      tags:
+      - diagrams
+    get:
+      description: Returns one diagram with its DBML and layout.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Diagram'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram get
+      tags:
+      - diagrams
+    patch:
+      consumes:
+      - application/json
+      description: Changes only the fields that are sent; a field left out keeps its
+        value.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: fields to change
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PatchDiagramRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Diagram'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram update
+      tags:
+      - diagrams
+    put:
+      consumes:
+      - application/json
+      description: Replaces the whole mutable representation; an omitted dbml or positions
+        becomes empty. Use PATCH to change only some fields.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: diagram
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReplaceDiagramRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Diagram'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram replace
+      tags:
+      - diagrams
+  /v1/diagrams/{key}/folder:
+    put:
+      consumes:
+      - application/json
+      description: Files the diagram in a folder; an empty folder_id takes it out
+        of its folder.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: folder
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SetDiagramFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Diagram'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram move to folder
+      tags:
+      - diagrams
+  /v1/diagrams/{key}/members:
+    get:
+      description: 'Who the diagram is shared with directly: the owner first, then
+        direct shares. Owner only.'
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MemberList'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram members
+      tags:
+      - members
+    put:
+      consumes:
+      - application/json
+      description: Gives a person (by email) editor or viewer access to this diagram;
+        calling it again changes their role. Owner only.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: person and role
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SetMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Member'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Share a diagram
+      tags:
+      - members
+  /v1/diagrams/{key}/members/{user}:
+    delete:
+      description: Removes a direct share. The owner can remove anyone; a member can
+        remove themselves (leave).
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: user guid
+        in: path
+        name: user
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Empty'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Unshare a diagram
+      tags:
+      - members
+  /v1/diagrams/{key}/revision:
+    get:
+      description: 'The tiny change marker the editor polls: the DBML revision and
+        who last saved.'
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Revision'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram revision
+      tags:
+      - diagrams
+  /v1/diagrams/{key}/share:
+    put:
+      consumes:
+      - application/json
+      description: Turns the public read-only link on or off. Turning it on again
+        keeps the same token.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: share switch
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SetDiagramShareRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Diagram'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram share
+      tags:
+      - diagrams
+  /v1/diagrams/{key}/versions:
+    get:
+      description: Snapshots of the diagram, newest first, without their DBML. An
+        empty label marks an automatic snapshot.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - default: 1
+        description: page, from 1
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: page size, max 1000
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.VersionList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram version list
+      tags:
+      - versions
+    post:
+      consumes:
+      - application/json
+      description: Takes a manual snapshot of the saved state of the diagram. The
+        body is optional.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: label
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/dto.CreateVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.VersionItem'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram version create
+      tags:
+      - versions
+  /v1/diagrams/{key}/versions/{version}:
+    delete:
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: version guid
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Empty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram version delete
+      tags:
+      - versions
+    get:
+      description: Returns one snapshot with its DBML and layout. A version of another
+        diagram is not found.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: version guid
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Version'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram version get
+      tags:
+      - versions
+  /v1/diagrams/{key}/versions/{version}/restore:
+    post:
+      description: Replaces the diagram's DBML and layout with the snapshot's; the
+        name is kept. The current state is saved as a new snapshot first, so a restore
+        can be undone.
+      parameters:
+      - description: diagram guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: version guid
+        in: path
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Diagram'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Diagram version restore
+      tags:
+      - versions
+  /v1/folders:
+    get:
+      description: search matches the name; sort is a JSON array [{field,type}] over
+        name, created_at, updated_at (default name asc).
+      parameters:
+      - description: text in the name
+        in: query
+        name: search
+        type: string
+      - description: JSON array of {field,type}
+        in: query
+        name: sort
+        type: string
+      - default: 1
+        description: page, from 1
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: page size, max 1000
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.FolderList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Folder list
+      tags:
+      - folders
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: folder
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Folder'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Folder create
+      tags:
+      - folders
+  /v1/folders/{key}:
+    delete:
+      description: Deletes an empty folder (owner only). A folder that still holds
+        folders or diagrams answers 409.
+      parameters:
+      - description: folder guid
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Empty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Folder delete
+      tags:
+      - folders
+    get:
+      parameters:
+      - description: folder guid
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Folder'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Folder get
+      tags:
+      - folders
+    patch:
+      consumes:
+      - application/json
+      description: Changes only the fields that are sent.
+      parameters:
+      - description: folder guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: fields to change
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PatchFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Folder'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Folder update
+      tags:
+      - folders
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: folder guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: folder
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReplaceFolderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Folder'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Folder replace
+      tags:
+      - folders
+  /v1/folders/{key}/members:
+    get:
+      description: 'Who the folder is shared with: the owner first, then direct shares.
+        Owner only. Access inherited from an ancestor folder is managed on that folder.'
+      parameters:
+      - description: folder guid
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MemberList'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Folder members
+      tags:
+      - members
+    put:
+      consumes:
+      - application/json
+      description: Gives a person (by email) editor or viewer access to the folder
+        and everything inside it; calling it again changes their role. Owner only.
+      parameters:
+      - description: folder guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: person and role
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SetMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Member'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Share a folder
+      tags:
+      - members
+  /v1/folders/{key}/members/{user}:
+    delete:
+      description: Removes a direct share. The owner can remove anyone; a member can
+        remove themselves (leave).
+      parameters:
+      - description: folder guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: user guid
+        in: path
+        name: user
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Empty'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Unshare a folder
+      tags:
+      - members
+  /v1/folders/{key}/parent:
+    put:
+      consumes:
+      - application/json
+      description: Moves the folder under another one (or to the top with an empty
+        parent_id). Needs owner on the folder and editor on the destination; a folder
+        cannot go into itself or its own subtree.
+      parameters:
+      - description: folder guid
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: new parent
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SetParentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Folder'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Folder move
+      tags:
+      - folders
+  /v1/health:
+    get:
+      description: Answers ok while the database answers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Health'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Health
+      tags:
+      - system
+  /v1/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Current user
+      tags:
+      - auth
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: profile
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateMeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Update profile
+      tags:
+      - auth
+  /v1/me/password:
+    put:
+      consumes:
+      - application/json
+      description: Needs the current password. Every other login of the account is
+        ended.
+      parameters:
+      - description: passwords
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Empty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Change password
+      tags:
+      - auth
+  /v1/me/tokens:
+    get:
+      description: Lists your active (not revoked, not expired) tokens. Needs a login
+        session, not a token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TokenList'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Personal access tokens
+      tags:
+      - tokens
+    post:
+      consumes:
+      - application/json
+      description: Creates a token for scripts and AI agents (including the MCP endpoint).
+        The secret is in the response once and is never shown again. Needs a login
+        session, not a token.
+      parameters:
+      - description: token
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CreatedAccessToken'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a personal access token
+      tags:
+      - tokens
+  /v1/me/tokens/{key}:
+    delete:
+      description: Takes effect immediately. Needs a login session, not a token.
+      parameters:
+      - description: token guid
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Empty'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Revoke a personal access token
+      tags:
+      - tokens
+  /v1/shared/{key}:
+    get:
+      description: 'Public and read-only: returns the name, DBML and layout behind
+        a share token, nothing else.'
+      parameters:
+      - description: share token
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SharedDiagram'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      summary: Shared diagram get
+      tags:
+      - shared
+securityDefinitions:
+  ApiKeyAuth:
+    description: Type "Bearer" and a space, then the access token from /v1/auth/login.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

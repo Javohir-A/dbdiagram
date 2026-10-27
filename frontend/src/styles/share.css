@@ -1,0 +1,15 @@
+.share-note { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.share-add { display: flex; gap: 8px; margin-bottom: 10px; }
+.share-add input { flex: 1; min-width: 0; border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 7px 9px; }
+.member-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 260px; overflow: auto; }
+.member-row { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-top: 1px solid var(--border); }
+.member-who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.member-who strong, .member-who small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.member-who small { color: var(--muted); font-size: 12px; }
+.member-role { color: var(--muted); font-size: 13px; padding-right: 8px; }
+.member-x { background: none; border: 0; font-size: 18px; line-height: 1; color: var(--muted); cursor: pointer; border-radius: var(--radius); padding: 2px 8px; }
+.member-x:hover { color: var(--danger); background: var(--hover); }
+.public-link { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+.public-link h4 { margin: 0 0 4px; }
+.conflict-options { margin: 8px 0 0; padding-left: 18px; color: var(--text); font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
+.conflict-banner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 14px; background: #fdecee; color: #7a1f2b; border-bottom: 1px solid #f0b4bc; }

@@ -1,0 +1,450 @@
+package dbml
+
+import (
+	"errors"
+	"fmt"
+	"regexp"
+	"strings"
+	"unicode"
+)
+
+// Dialect selects the SQL flavour ExportSQL writes.
+type Dialect string
+
+const (
+	Postgres Dialect = "postgres"
+	MySQL    Dialect = "mysql"
+)
+
+var (
+	numberLiteral = regexp.MustCompile(`^-?[0-9]+(\.[0-9]+)?$|^(true|false|null)$`)
+	indexMethods  = map[string]bool{"btree": true, "hash": true, "gin": true, "gist": true, "brin": true, "spgist": true}
+	integerTypes  = map[string]bool{"int": true, "integer": true, "int2": true, "int4": true, "int8": true, "smallint": true, "bigint": true, "tinyint": true, "mediumint": true}
+)
+
+type exporter struct {
+	d     Dialect
+	enums map[string]*Enum
+}
+
+// ExportSQL writes CREATE statements for the schema. Everything the source
+// could say is escaped for the dialect; a construct that cannot be written
+// safely (an expression with a semicolon, a type with odd characters) is left
+// out and reported in a `-- ` comment instead of being passed through.
+func ExportSQL(s *Schema, d Dialect) (string, error) {
+	if s == nil {
+		return "", errors.New("dbml: nil schema")
+	}
+	if d != Postgres && d != MySQL {
+		return "", fmt.Errorf("dbml: unsupported dialect %q (use %q or %q)", d, Postgres, MySQL)
+	}
+
+	var (
+		e      = &exporter{d: d, enums: map[string]*Enum{}}
+		blocks []string
+	)
+
+	for i := range s.Enums {
+		e.enums[s.Enums[i].ID()] = &s.Enums[i]
+	}
+
+	if d == Postgres {
+		blocks = append(blocks, e.schemas(s)...)
+		for i := range s.Enums {
+			blocks = append(blocks, e.enumType(&s.Enums[i]))
+		}
+	}
+	for i := range s.Tables {
+		blocks = append(blocks, e.table(&s.Tables[i]))
+	}
+	for i := range s.Tables {
+		blocks = append(blocks, e.indexes(&s.Tables[i])...)
+	}
+	blocks = append(blocks, e.foreignKeys(s)...)
+	if d == Postgres {
+		blocks = append(blocks, e.comments(s)...)
+	}
+
+	if len(blocks) == 0 {
+		return "", nil
+	}
+
+	return strings.Join(blocks, "\n\n") + "\n", nil
+}
+
+func (e *exporter) ident(s string) string {
+	s = strings.ReplaceAll(s, "\x00", "")
+	if e.d == MySQL {
+		return "`" + strings.ReplaceAll(s, "`", "``") + "`"
+	}
+
+	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
+}
+
+func (e *exporter) qualified(schema, name string) string {
+	if schema == "" || schema == "public" {
+		return e.ident(name)
+	}
+
+	return e.ident(schema) + "." + e.ident(name)
+}
+
+// lit quotes a string value. MySQL treats a backslash as an escape by default,
+// so it is doubled there; Postgres (standard_conforming_strings) does not.
+func (e *exporter) lit(s string) string {
+	s = strings.ReplaceAll(s, "\x00", "")
+	if e.d == MySQL {
+		s = strings.ReplaceAll(s, `\`, `\\`)
+	}
+
+	return "'" + strings.ReplaceAll(s, "'", "''") + "'"
+}
+
+func (e *exporter) schemas(s *Schema) []string {
+	var (
+		seen = map[string]bool{}
+		out  []string
+	)
+
+	add := func(schema string) {
+		if schema == "" || schema == "public" || seen[schema] {
+			return
+		}
+		seen[schema] = true
+		out = append(out, "CREATE SCHEMA IF NOT EXISTS "+e.ident(schema)+";")
+	}
+
+	for _, en := range s.Enums {
+		add(en.Schema)
+	}
+	for _, t := range s.Tables {
+		add(t.Schema)
+	}
+	if len(out) == 0 {
+		return nil
+	}
+
+	return []string{strings.Join(out, "\n")}
+}
+
+func (e *exporter) enumValues(en *Enum) string {
+	values := make([]string, 0, len(en.Values))
+	for _, v := range en.Values {
+		values = append(values, e.lit(v.Name))
+	}
+
+	return strings.Join(values, ", ")
+}
+
+func (e *exporter) enumType(en *Enum) string {
+	return "CREATE TYPE " + e.qualified(en.Schema, en.Name) + " AS ENUM (" + e.enumValues(en) + ");"
+}
+
+// colType returns the type text and, when something could not be written as
+// is, a warning for the comment above the table.
+func (e *exporter) colType(t *Table, c *Column) (string, string) {
+	if en := e.enums[strings.TrimPrefix(c.Type, "public.")]; en != nil {
+		if e.d == MySQL {
+			return "ENUM(" + e.enumValues(en) + ")", ""
+		}
+
+		return e.qualified(en.Schema, en.Name), ""
+	}
+
+	switch {
+	case c.Type == "":
+		return "text", fmt.Sprintf("%s.%s has no type, text used", t.ID(), c.Name)
+	case safeSQL(c.Type, true):
+		return c.Type, ""
+	default:
+		return e.ident(c.Type), fmt.Sprintf("%s.%s: type written as a quoted name because it has unsafe characters", t.ID(), c.Name)
+	}
+}
+
+func isIntegerType(typ string) bool {
+	word := strings.ToLower(typ)
+	if i := strings.IndexAny(word, "( "); i >= 0 {
+		word = word[:i]
+	}
+
+	return integerTypes[word]
+}
+
+func (e *exporter) table(t *Table) string {
+	var (
+		warns []string
+		lines []string
+		pk    []string
+		inPK  = map[string]bool{}
+	)
+
+	for i := range t.Columns {
+		c := &t.Columns[i]
+		typ, warn := e.colType(t, c)
+		if warn != "" {
+			warns = append(warns, warn)
+		}
+
+		parts := []string{e.ident(c.Name), typ}
+
+		if c.Increment {
+			switch {
+			case !isIntegerType(c.Type):
+				warns = append(warns, fmt.Sprintf("%s.%s: increment ignored, it needs an integer type", t.ID(), c.Name))
+			case e.d == MySQL:
+				parts = append(parts, "AUTO_INCREMENT")
+			default:
+				parts = append(parts, "GENERATED BY DEFAULT AS IDENTITY")
+			}
+		}
+		if c.NotNull {
+			parts = append(parts, "NOT NULL")
+		}
+		if c.Unique {
+			parts = append(parts, "UNIQUE")
+		}
+		if c.Default != nil {
+			def, ok := e.defaultSQL(c)
+			if ok {
+				parts = append(parts, "DEFAULT "+def)
+			} else {
+				warns = append(warns, fmt.Sprintf("%s.%s: default left out because it is not safe to write as SQL", t.ID(), c.Name))
+			}
+		}
+		if e.d == MySQL && c.Note != "" {
+			parts = append(parts, "COMMENT "+e.lit(c.Note))
+		}
+
+		lines = append(lines, strings.Join(parts, " "))
+
+		if c.PK && !inPK[c.Name] {
+			inPK[c.Name] = true
+			pk = append(pk, c.Name)
+		}
+	}
+
+	for _, idx := range t.Indexes {
+		if !idx.PK {
+			continue
+		}
+		for _, ic := range idx.Columns {
+			if !ic.Expr && !inPK[ic.Name] {
+				inPK[ic.Name] = true
+				pk = append(pk, ic.Name)
+			}
+		}
+	}
+	if len(pk) > 0 {
+		lines = append(lines, "PRIMARY KEY ("+e.identList(pk)+")")
+	}
+
+	var b strings.Builder
+
+	for _, w := range warns {
+		b.WriteString("-- " + oneLine(w) + "\n")
+	}
+
+	name := e.qualified(t.Schema, t.Name)
+	if len(lines) == 0 {
+		b.WriteString("CREATE TABLE " + name + " ()")
+	} else {
+		b.WriteString("CREATE TABLE " + name + " (\n  " + strings.Join(lines, ",\n  ") + "\n)")
+	}
+	if e.d == MySQL && t.Note != "" {
+		b.WriteString(" COMMENT=" + e.lit(t.Note))
+	}
+	b.WriteString(";")
+
+	return b.String()
+}
+
+func (e *exporter) defaultSQL(c *Column) (string, bool) {
+	switch c.DefaultKind {
+	case DefaultString:
+		return e.lit(*c.Default), true
+	case DefaultNumber:
+		return *c.Default, numberLiteral.MatchString(*c.Default)
+	case DefaultExpr:
+		return *c.Default, safeSQL(*c.Default, false)
+	default:
+		return "", false
+	}
+}
+
+func (e *exporter) identList(names []string) string {
+	quoted := make([]string, 0, len(names))
+	for _, n := range names {
+		quoted = append(quoted, e.ident(n))
+	}
+
+	return strings.Join(quoted, ", ")
+}
+
+func (e *exporter) indexes(t *Table) []string {
+	var out []string
+
+	for _, idx := range t.Indexes {
+		if idx.PK {
+			continue
+		}
+
+		var (
+			cols  []string
+			names []string
+			ok    = true
+		)
+		for _, ic := range idx.Columns {
+			if ic.Expr {
+				if !safeSQL(ic.Name, false) {
+					ok = false
+					break
+				}
+				cols = append(cols, "("+ic.Name+")")
+				names = append(names, "expr")
+				continue
+			}
+			cols = append(cols, e.ident(ic.Name))
+			names = append(names, ic.Name)
+		}
+		if !ok {
+			out = append(out, "-- index on "+oneLine(t.ID())+" left out because an expression is not safe to write as SQL")
+			continue
+		}
+
+		name := idx.Name
+		if name == "" {
+			name = t.Name + "_" + strings.Join(names, "_") + "_idx"
+		}
+
+		stmt := "CREATE "
+		if idx.Unique {
+			stmt += "UNIQUE "
+		}
+		stmt += "INDEX " + e.ident(name) + " ON " + e.qualified(t.Schema, t.Name)
+		if e.d == Postgres && indexMethods[idx.Type] {
+			stmt += " USING " + idx.Type
+		}
+		out = append(out, stmt+" ("+strings.Join(cols, ", ")+");")
+	}
+
+	return out
+}
+
+func (e *exporter) foreignKeys(s *Schema) []string {
+	var (
+		out  []string
+		byID = map[string]*Table{}
+	)
+
+	for i := range s.Tables {
+		byID[s.Tables[i].ID()] = &s.Tables[i]
+	}
+
+	for _, r := range s.Refs {
+		from, to := r.From, r.To
+
+		switch r.Relation {
+		case "<>":
+			out = append(out, "-- many-to-many "+oneLine(from.String())+" <> "+oneLine(to.String())+" needs a junction table, not generated")
+			continue
+		case "<":
+			from, to = to, from
+		}
+
+		ft, tt := byID[from.Table], byID[to.Table]
+		if ft == nil || tt == nil {
+			out = append(out, "-- relationship "+oneLine(r.From.String()+" "+r.Relation+" "+r.To.String())+" left out because a table is unknown")
+			continue
+		}
+
+		out = append(out, "ALTER TABLE "+e.qualified(ft.Schema, ft.Name)+" ADD FOREIGN KEY ("+e.identList(from.Columns)+
+			") REFERENCES "+e.qualified(tt.Schema, tt.Name)+" ("+e.identList(to.Columns)+");")
+	}
+
+	return out
+}
+
+func (e *exporter) comments(s *Schema) []string {
+	var out []string
+
+	for i := range s.Tables {
+		t := &s.Tables[i]
+		name := e.qualified(t.Schema, t.Name)
+
+		if t.Note != "" {
+			out = append(out, "COMMENT ON TABLE "+name+" IS "+e.lit(t.Note)+";")
+		}
+		for _, c := range t.Columns {
+			if c.Note != "" {
+				out = append(out, "COMMENT ON COLUMN "+name+"."+e.ident(c.Name)+" IS "+e.lit(c.Note)+";")
+			}
+		}
+	}
+
+	return out
+}
+
+// safeSQL reports whether s can be pasted into a statement without being able
+// to end it or start a comment. Quoted parts must be closed and, because MySQL
+// reads backslashes as escapes, free of them. strict additionally limits the
+// text outside quotes to what a type name needs.
+func safeSQL(s string, strict bool) bool {
+	var (
+		rs    = []rune(s)
+		depth int
+	)
+
+	for i := 0; i < len(rs); i++ {
+		r := rs[i]
+
+		switch r {
+		case '\'', '"', '`':
+			j := i + 1
+			for ; j < len(rs); j++ {
+				if rs[j] == '\\' || rs[j] == 0 {
+					return false
+				}
+				if rs[j] != r {
+					continue
+				}
+				if j+1 < len(rs) && rs[j+1] == r {
+					j++
+					continue
+				}
+				break
+			}
+			if j >= len(rs) {
+				return false
+			}
+			i = j
+
+			continue
+		case '(':
+			depth++
+		case ')':
+			depth--
+			if depth < 0 {
+				return false
+			}
+		case ';', '#', '\\':
+			return false
+		case '-':
+			if i+1 < len(rs) && rs[i+1] == '-' {
+				return false
+			}
+		case '/':
+			if i+1 < len(rs) && rs[i+1] == '*' {
+				return false
+			}
+		}
+
+		if unicode.IsControl(r) && r != '\t' {
+			return false
+		}
+		if strict && !(unicode.IsLetter(r) || unicode.IsDigit(r) || strings.ContainsRune(" _,().[]", r)) {
+			return false
+		}
+	}
+
+	return depth == 0
+}

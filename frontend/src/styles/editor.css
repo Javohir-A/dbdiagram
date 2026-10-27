@@ -1,0 +1,8 @@
+/* The editor pane's own layout lives in split.css; this file holds the error badge. */
+.err-badge { position: absolute; left: 12px; bottom: 12px; z-index: 5; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; max-width: calc(100% - 24px); }
+.err-pill { background: #e5484d; color: #fff; border: 0; border-radius: 999px; padding: 6px 12px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px #0005; }
+.err-pill:hover { background: #cf3a3f; }
+.err-list { list-style: none; margin: 0; padding: 4px; background: #2a1d20; border: 1px solid #5a2b31; border-radius: 8px; max-height: 40vh; overflow: auto; box-shadow: 0 6px 20px #0006; }
+.err-list button { display: block; width: 100%; text-align: left; background: none; border: 0; color: #ffb3bd; padding: 6px 8px; border-radius: 6px; cursor: pointer; font: 12px ui-monospace, monospace; }
+.err-list button:hover { background: #3a2327; }
+.err-list b { color: #fff; }

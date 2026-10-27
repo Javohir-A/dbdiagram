@@ -1,0 +1,13 @@
+.auth-page { min-height: 100%; display: grid; place-items: center; padding: 24px 16px; background: var(--bg); }
+.auth-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px 28px 22px; box-shadow: 0 8px 30px #1c233314; }
+.auth-card h1 { margin: 8px 0 18px; font-size: 20px; }
+.auth-card .btn.block { margin-top: 6px; }
+.auth-foot { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: 13px; }
+.field label { font-size: 13px; font-weight: 600; }
+.field input[aria-invalid='true'] { border-color: var(--danger); }
+.field-error { color: var(--danger); font-size: 12px; }
+.field-hint { color: var(--muted); font-size: 12px; }
+.form-error { margin: 0 0 10px; padding: 8px 10px; border-radius: var(--radius); background: #fdecee; color: #9b1c2b; font-size: 13px; }
+.form-note { margin: 0 0 12px; padding: 8px 10px; border-radius: var(--radius); background: #fff7e0; color: #5c4400; font-size: 13px; }
+.dialog-sep { border: 0; border-top: 1px solid var(--border); margin: 14px 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; padding: 0; }

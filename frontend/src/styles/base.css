@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { font: 14px/1.4 system-ui, -apple-system, sans-serif; color: var(--text); background: var(--bg); }
+button, input, select, textarea { font: inherit; }
+:focus-visible { outline: none; box-shadow: var(--focus); }
+a { color: var(--accent); }

@@ -1,0 +1,19 @@
+.muted { color: var(--muted); font-size: 13px; }
+.tok-h { margin: 12px 0 4px; font-size: 14px; }
+.tok-form { display: flex; flex-direction: column; gap: 6px; }
+.tok-scope { border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.tok-scope legend { font-size: 13px; padding: 0 4px; }
+.tok-radio { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.tok-radio small { display: block; color: var(--muted); }
+.tok-reveal { border: 1px solid #e0b100; background: #fff8dc; border-radius: var(--radius); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.tok-reveal p { margin: 0; }
+.tok-secret { display: flex; gap: 6px; }
+.tok-secret input { flex: 1; min-width: 0; font: 12px ui-monospace, monospace; padding: 7px 9px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); }
+.tok-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; }
+.tok-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
+.tok-meta { color: var(--muted); font-size: 12px; }
+.tok-badge { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: #e7ecff; color: var(--accent); }
+.tok-badge.write { background: #ffe9d6; color: #a14a00; }
+.tok-snippet { margin-top: 8px; }
+.tok-snippet-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.tok-snippet pre { margin: 0; padding: 8px 10px; background: #1e1e1e; color: #d4d4d4; border-radius: var(--radius); font: 12px/1.45 ui-monospace, monospace; white-space: pre-wrap; word-break: break-all; }

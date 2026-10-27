@@ -1,0 +1,5 @@
+ALTER TABLE diagrams DROP COLUMN IF EXISTS revision;
+ALTER TABLE diagrams DROP COLUMN IF EXISTS updated_by_guid;
+ALTER TABLE diagrams DROP COLUMN IF EXISTS owner_guid;
+ALTER TABLE folders  DROP COLUMN IF EXISTS parent_guid;
+ALTER TABLE folders  DROP COLUMN IF EXISTS owner_guid;

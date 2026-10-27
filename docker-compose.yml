@@ -37,7 +37,8 @@ services:
       POSTGRES_SEARCH_PATH: dbdiagram,shared,public
       MIGRATE_ON_START: "true"
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (min 32 chars)}
-      TRUSTED_PROXIES: frontend,caddy,nginx,127.0.0.1
+      # IPs/CIDRs only (hostnames are ignored): the compose network below, where nginx and caddy live.
+      TRUSTED_PROXIES: 172.28.0.0/24
 
   frontend:
     build:
@@ -70,6 +71,12 @@ services:
       - caddy_config:/config
     depends_on:
       - frontend
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
 
 volumes:
   postgres_data:
